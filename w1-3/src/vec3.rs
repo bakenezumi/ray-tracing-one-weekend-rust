@@ -78,19 +78,19 @@ impl fmt::Display for Vec3 {
 }
 
 impl Vec3 {
-  fn length(&self) -> f64 {
+  pub fn length(&self) -> f64 {
     self.length_squared().sqrt()
   }
 
-  fn length_squared(&self) -> f64 {
+  pub fn length_squared(&self) -> f64 {
     self.x * self.x + self.y * self.y + self.z * self.z
   }
 
-  fn dot(&self, v: &Vec3) -> f64 {
+  pub fn dot(&self, v: &Vec3) -> f64 {
     self.x * v.x + self.y * v.y + self.z * v.z
   }
 
-  fn cross(&self, v: &Vec3) -> Vec3 {
+  pub fn cross(&self, v: &Vec3) -> Vec3 {
     Vec3 {
       x: self.y * v.z - self.z * v.y,
       y: self.z * v.x - self.x * v.z,
