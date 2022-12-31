@@ -5,18 +5,24 @@ use ray::vec3::Vec3;
 use ray::vec3::write_color;
 use ray::vec3::Point3;
 
-fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> bool {
+fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
   let oc = r.origin - center;
   let a = r.direction.dot(&r.direction);
   let b = oc.dot(&r.direction) * 2.0;
   let c = oc.dot(&oc) - radius * radius;
   let discriminant = b*b - 4.0*a*c;
-  discriminant > 0.0
+  if discriminant < 0.0 {
+    -1.0
+  } else {
+    return (-b - discriminant.sqrt()) / (2.0*a)
+  }
 }
 
 fn ray_color(r: &Ray) -> Vec3 {
-  if (hit_sphere(Point3{ x: 0.0, y: 0.0, z: -1.0 }, 0.5, r)) {
-    return Vec3 { x: 1.0, y: 0.0, z: 0.0 }
+  let t = hit_sphere(Point3 { x: 0.0, y: 0.0, z: -1.0 }, 0.5, r);
+  if t > 0.0 {
+    let n = (r.at(t) - Point3 { x: 0.0, y: 0.0, z: -1.0 }).unit_vector();
+    return Point3 {x: n.x+1.0, y: n.y+1.0, z: n.z+1.0 } * 0.5;
   };
   let unit_direction = r.direction.unit_vector();
   let t = 0.5 * (unit_direction.y + 1.0);
