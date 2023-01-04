@@ -1,9 +1,7 @@
-#[path = "hittable.rs"] pub mod hittable;
-
-use hittable::Hittable;
-use hittable::HitRecoad;
-use hittable::ray::Ray;
-use hittable::ray::vec3::Point3;
+use crate::hittable::Hittable;
+use crate::hittable::HitRecoad;
+use crate::ray::Ray;
+use crate::vec3::Point3;
 
 struct Sphere {
   center: Point3,

@@ -1,7 +1,6 @@
-#[path = "ray.rs"] pub mod ray;
-use ray::Ray;
-use ray::vec3::Vec3;
-use ray::vec3::Point3;
+use crate::ray::Ray;
+use crate::vec3::Vec3;
+use crate::vec3::Point3;
 
 pub struct HitRecoad {
   pub p: Point3,

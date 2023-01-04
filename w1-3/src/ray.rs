@@ -1,6 +1,5 @@
-#[path = "vec3.rs"] pub mod vec3;
-use vec3::Vec3;
-use vec3::Point3;
+use crate::vec3::Vec3;
+use crate::vec3::Point3;
 
 pub struct Ray {
   pub origin: Point3,
