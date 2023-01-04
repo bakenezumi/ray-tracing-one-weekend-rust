@@ -1,9 +1,9 @@
-mod ray;
-use ray::Ray;
+mod sphere;
+use sphere::hittable::ray::Ray;
 
-use ray::vec3::Vec3;
-use ray::vec3::write_color;
-use ray::vec3::Point3;
+use sphere::hittable::ray::vec3::Vec3;
+use sphere::hittable::ray::vec3::write_color;
+use sphere::hittable::ray::vec3::Point3;
 
 fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
   let oc = r.origin - center;
