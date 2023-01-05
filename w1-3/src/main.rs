@@ -1,8 +1,11 @@
 use weekend::ray::Ray;
-
 use weekend::vec3::Vec3;
 use weekend::vec3::write_color;
 use weekend::vec3::Point3;
+use weekend::hittable::HitRecord;
+use weekend::hittable::Hittable;
+use weekend::hittable_list::HittableList;
+use weekend::sphere::Sphere;
 
 fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
   let oc = r.origin - center;
@@ -18,12 +21,13 @@ fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
   }
 }
 
-fn ray_color(r: &Ray) -> Vec3 {
-  let t = hit_sphere(Point3 { x: 0.0, y: 0.0, z: -1.0 }, 0.5, r);
-  if t > 0.0 {
-    let n = (r.at(t) - Point3 { x: 0.0, y: 0.0, z: -1.0 }).unit_vector();
-    return Point3 {x: n.x+1.0, y: n.y+1.0, z: n.z+1.0 } * 0.5;
-  };
+fn ray_color(r: &Ray, world: &dyn Hittable) -> Vec3 {
+  match world.hit(r, 0.0, f64::INFINITY) {
+    None => {}
+    Some(rec) => {
+      return (rec.normal + Vec3 { x: 1.0, y: 1.0, z: 1.0 }) * 0.5;
+    }
+  }
   let unit_direction = r.direction.unit_vector();
   let t = 0.5 * (unit_direction.y + 1.0);
   Vec3 { x: 1.0, y: 1.0, z: 1.0 } * (1.0 - t) + Vec3 { x: 0.5, y: 0.7, z: 1.0 } * t
@@ -48,6 +52,15 @@ fn main() {
   let lower_left_corner =
     origin - horizontal/2.0 - vertical/2.0 - Vec3 { x: 0.0, y: 0.0, z: focal_length };
 
+  let mut world = HittableList::new();
+  world.add(&Sphere {
+    center: Vec3 { x: 0.0, y: 0.0, z: -1.0 },
+    radius: 0.5
+  });
+  world.add(&Sphere {
+    center: Vec3 { x: 0.0, y: -100.5, z: -1.0 },
+    radius: 100.0
+  });
   for j in (0 .. image_height).rev() {
     eprint!("\rScanlines remaining: {} ", j);
     for i in 0 .. image_width {
@@ -57,7 +70,7 @@ fn main() {
         origin: origin,
         direction: lower_left_corner + horizontal*u + vertical*v - origin
       };
-      let pixel_color = ray_color(&r);
+      let pixel_color = ray_color(&r, &world);
       write_color(&pixel_color);    
     }
   }
