@@ -1,4 +1,5 @@
 use rand::Rng;
+use rand::rngs::ThreadRng;
 
 use weekend::ray::Ray;
 use weekend::vec3::Vec3;
@@ -8,11 +9,19 @@ use weekend::hittable_list::HittableList;
 use weekend::sphere::Sphere;
 use weekend::camera::Camera;
 
-fn ray_color(r: &Ray, world: &dyn Hittable) -> Vec3 {
+fn ray_color(r: &Ray, world: &dyn Hittable,rng: &mut ThreadRng) -> Vec3 {
   match world.hit(r, 0.0, f64::INFINITY) {
     None => {}
     Some(rec) => {
-      return (rec.normal + Vec3 { x: 1.0, y: 1.0, z: 1.0 }) * 0.5;
+      let target = rec.p + rec.normal + Vec3::random_in_unit_sphere(rng);
+      return ray_color(
+        &Ray {
+          origin: rec.p,
+          direction: target - rec.p
+        },
+        world,
+        rng
+      ) * 0.5;
     }
   }
   let unit_direction = r.direction.unit_vector();
@@ -21,7 +30,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable) -> Vec3 {
 }
 
 fn main() {
-  let mut rng = rand::thread_rng();
+  let mut rng = Box::new(rand::thread_rng());
 
   let aspect_ratio = 16.0 / 9.0;
   let image_width = 384;
@@ -52,7 +61,7 @@ fn main() {
         let u = (i as f64 + rng.gen::<f64>()) / (image_width-1) as f64;
         let v = (j as f64 + rng.gen::<f64>()) / (image_height-1) as f64;
         let r = cam.get_ray(u, v);
-        pixel_color = pixel_color + ray_color(&r, &world);
+        pixel_color = pixel_color + ray_color(&r, &world, &mut rng);
       }
       
       write_color(&pixel_color, samples_per_pixel);    

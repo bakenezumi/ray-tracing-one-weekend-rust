@@ -3,7 +3,10 @@ use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
 use std::ops::Div;
+use std::ops::Range;
 use std::fmt;
+use rand::Rng;
+use rand::rngs::ThreadRng;
 
 pub struct Vec3 {
   pub x: f64,
@@ -100,6 +103,32 @@ impl Vec3 {
 
   pub fn unit_vector(&self) -> Vec3 {
     *self / self.length()
+  }
+
+  pub fn random(rng: &mut ThreadRng) -> Vec3 {
+    Vec3 {
+      x: rng.gen::<f64>(),
+      y: rng.gen::<f64>(),
+      z: rng.gen::<f64>()
+    }
+  }
+
+  pub fn random_range(rng: &mut ThreadRng, range: Range<f64>) -> Vec3 {
+    Vec3 {
+      x: rng.gen_range(range.clone()),
+      y: rng.gen_range(range.clone()),
+      z: rng.gen_range(range)
+    }
+  }
+
+  pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Vec3 {
+    loop {
+      let p = Vec3::random_range(rng, -1.0..1.0);
+      if p.length_squared() >= 1.0 {
+        continue;
+      }
+      return p;
+    }
   }
 }
 
