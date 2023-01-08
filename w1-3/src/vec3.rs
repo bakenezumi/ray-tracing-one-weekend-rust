@@ -105,11 +105,3 @@ impl Vec3 {
 
 pub type Point3 = Vec3;
 pub type Color = Vec3;
-
-
-pub fn write_color(color: &Color) {
-  fn f(v: f64) -> i64 {
-    (v * 255.999) as i64
-  }
-  println!("{} {} {}", f(color.x), f(color.y), f(color.z));
-}
