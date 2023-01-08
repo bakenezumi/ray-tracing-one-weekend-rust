@@ -142,6 +142,15 @@ impl Vec3 {
       z: z
     }
   }
+
+  pub fn random_in_hemisphere(rng: &mut ThreadRng, normal: &Vec3) -> Vec3 {
+    let in_unit_sphere = Vec3::random_in_unit_sphere(rng);
+    if in_unit_sphere.dot(normal) > 0.0 {
+      in_unit_sphere
+    } else {
+      -in_unit_sphere
+    }
+  }
 }
 
 pub type Point3 = Vec3;
