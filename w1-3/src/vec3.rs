@@ -4,6 +4,7 @@ use std::ops::Sub;
 use std::ops::Mul;
 use std::ops::Div;
 use std::ops::Range;
+use std::f64::consts::PI;
 use std::fmt;
 use rand::Rng;
 use rand::rngs::ThreadRng;
@@ -107,9 +108,9 @@ impl Vec3 {
 
   pub fn random(rng: &mut ThreadRng) -> Vec3 {
     Vec3 {
-      x: rng.gen::<f64>(),
-      y: rng.gen::<f64>(),
-      z: rng.gen::<f64>()
+      x: rng.gen(),
+      y: rng.gen(),
+      z: rng.gen()
     }
   }
 
@@ -128,6 +129,17 @@ impl Vec3 {
         continue;
       }
       return p;
+    }
+  }
+
+  pub fn random_in_unit_vector(rng: &mut ThreadRng) -> Vec3 {
+    let a: f64 = rng.gen_range(0.0..2.0*PI);
+    let z: f64 = rng.gen_range(-1.0..1.0);
+    let r: f64 = (1.0 - z*z).sqrt();
+    Vec3 {
+      x: r*a.cos(),
+      y: r*a.sin(),
+      z: z
     }
   }
 }
