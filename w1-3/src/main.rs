@@ -13,7 +13,7 @@ fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> 
   if depth <= 0 {
     return Vec3 {x: 0.0, y: 0.0, z: 0.0 };
   }
-  match world.hit(r, 0.0, f64::INFINITY) {
+  match world.hit(r, 0.001, f64::INFINITY) {
     None => {}
     Some(rec) => {
       let target = rec.p + rec.normal + Vec3::random_in_unit_vector(rng);
