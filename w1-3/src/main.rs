@@ -9,18 +9,22 @@ use weekend::hittable_list::HittableList;
 use weekend::sphere::Sphere;
 use weekend::camera::Camera;
 
-fn ray_color(r: &Ray, world: &dyn Hittable,rng: &mut ThreadRng) -> Vec3 {
+fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
+  if depth <= 0 {
+    return Vec3 {x: 0.0, y: 0.0, z: 0.0 };
+  }
   match world.hit(r, 0.0, f64::INFINITY) {
     None => {}
     Some(rec) => {
       let target = rec.p + rec.normal + Vec3::random_in_unit_sphere(rng);
       return ray_color(
+        rng,
         &Ray {
           origin: rec.p,
           direction: target - rec.p
         },
         world,
-        rng
+        depth - 1
       ) * 0.5;
     }
   }
@@ -34,8 +38,9 @@ fn main() {
 
   let aspect_ratio = 16.0 / 9.0;
   let image_width = 384;
-  let image_height = ((image_width as f64) / aspect_ratio) as i64;
+  let image_height = ((image_width as f64) / aspect_ratio) as i32;
   let samples_per_pixel = 100;
+  let max_depth = 50;
 
   println!("P3");
   println!("{} {}", image_width, image_height);
@@ -61,7 +66,7 @@ fn main() {
         let u = (i as f64 + rng.gen::<f64>()) / (image_width-1) as f64;
         let v = (j as f64 + rng.gen::<f64>()) / (image_height-1) as f64;
         let r = cam.get_ray(u, v);
-        pixel_color = pixel_color + ray_color(&r, &world, &mut rng);
+        pixel_color = pixel_color + ray_color(&mut rng, &r, &world, max_depth);
       }
       
       write_color(&pixel_color, samples_per_pixel);    
