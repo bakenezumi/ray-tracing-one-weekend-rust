@@ -68,6 +68,18 @@ impl Mul<f64> for Vec3 {
   }
 }
 
+impl Mul<Vec3> for Vec3 {
+  type Output = Vec3;
+  fn mul(self, v: Vec3) -> Self::Output {
+    Vec3 {
+      x: self.x * v.x,
+      y: self.y * v.y,
+      z: self.z * v.z
+    }
+  }
+}
+
+
 impl Div<f64> for Vec3 {
   type Output = Vec3;
   fn div(self, t: f64) -> Self::Output {
@@ -82,6 +94,10 @@ impl fmt::Display for Vec3 {
 }
 
 impl Vec3 {
+  pub fn new(x: f64, y: f64, z: f64) -> Vec3 {
+    Vec3 { x, y, z }
+  }
+
   pub fn length(&self) -> f64 {
     self.length_squared().sqrt()
   }
@@ -132,7 +148,7 @@ impl Vec3 {
     }
   }
 
-  pub fn random_in_unit_vector(rng: &mut ThreadRng) -> Vec3 {
+  pub fn random_unit_vector(rng: &mut ThreadRng) -> Vec3 {
     let a: f64 = rng.gen_range(0.0..2.0*PI);
     let z: f64 = rng.gen_range(-1.0..1.0);
     let r: f64 = (1.0 - z*z).sqrt();
@@ -150,6 +166,10 @@ impl Vec3 {
     } else {
       -in_unit_sphere
     }
+  }
+
+  pub fn reflect(&self, n: &Vec3) -> Vec3 {
+    *self - *n*self.dot(n)*2.0
   }
 }
 
