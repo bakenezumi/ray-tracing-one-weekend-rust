@@ -48,7 +48,7 @@ fn main() {
   println!("255");
 
   let mut world = HittableList::new();
-  let lambertian1 = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
+  let lambertian1 = Lambertian::new(Vec3::new(0.1, 0.3, 0.5));
   let sphere1 = Sphere::new (
     Vec3::new(0.0, 0.0, -1.0),
     0.5,
@@ -60,7 +60,7 @@ fn main() {
     100.0,
     & lambertian2
   );
-  let metal1 = Metal::new(Vec3::new(0.8, 0.6, 0.2), 1.0);
+  let metal1 = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
   let sphere3 = Sphere::new (
     Vec3::new(1.0, 0.0, -1.0),
     0.5,

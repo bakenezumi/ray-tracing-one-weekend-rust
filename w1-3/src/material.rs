@@ -50,7 +50,7 @@ impl Dielactric {
 }
 
 impl Material for Dielactric {
-  fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+  fn scatter<'a>(&self, _: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
     let attenuation = Vec3::new(1.0, 1.0, 1.0);
     let etai_over_etat = if rec.front_face {
       1.0 / self.ref_idx
@@ -59,6 +59,17 @@ impl Material for Dielactric {
     };
 
     let unit_direction = Vec3::unit_vector(&r_in.direction);
+
+    let cos_thena = std::cmp::min_by(-unit_direction.dot(&rec.normal), 1.0, |a, b| a.partial_cmp(b).unwrap());
+    let sin_thena = (1.0 - cos_thena*cos_thena).sqrt();
+    if etai_over_etat * sin_thena > 1.0 {
+      let reflected = unit_direction.reflect(&rec.normal);
+      let scattered = Ray::new(rec.p, reflected);
+      return Some((attenuation, scattered))
+    }
+
+
+
     let refracted = unit_direction.refract(&rec.normal, etai_over_etat);
     let scattered = Ray::new(rec.p, refracted);
     Some((attenuation, scattered))
