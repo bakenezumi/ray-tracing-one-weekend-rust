@@ -59,13 +59,13 @@ fn main() {
     100.0,
     & lambertian2
   );
-  let metal1 = Metal::new(Vec3::new(0.8, 0.6, 0.2));
+  let metal1 = Metal::new(Vec3::new(0.8, 0.6, 0.2), 1.0);
   let sphere3 = Sphere::new (
     Vec3::new(1.0, 0.0, -1.0),
     0.5,
     & metal1
   );
-  let metal2 = Metal::new(Vec3::new(0.8, 0.8, 0.8));
+  let metal2 = Metal::new(Vec3::new(0.8, 0.8, 0.8), 1.0);
   let sphere4 = Sphere::new (
     Vec3::new(-1.0, 0.0, -1.0),
     0.5,
