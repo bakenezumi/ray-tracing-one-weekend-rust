@@ -10,6 +10,7 @@ use weekend::sphere::Sphere;
 use weekend::sphere::Lambertian;
 use weekend::camera::Camera;
 use weekend::material::Metal;
+use weekend::material::Dielactric;
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -65,11 +66,11 @@ fn main() {
     0.5,
     & metal1
   );
-  let metal2 = Metal::new(Vec3::new(0.8, 0.8, 0.8), 1.0);
+  let dialectric1 = Dielactric::new(1.5);
   let sphere4 = Sphere::new (
     Vec3::new(-1.0, 0.0, -1.0),
     0.5,
-    & metal2
+    & dialectric1
   );
 
   world.add(&sphere1);

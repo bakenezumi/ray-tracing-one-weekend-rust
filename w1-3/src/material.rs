@@ -36,3 +36,31 @@ impl Material for Metal {
     }
   }
 }
+
+pub struct Dielactric {
+  ref_idx: f64
+}
+
+impl Dielactric {
+  pub fn new(ref_idx: f64) -> Dielactric {
+    Dielactric {
+      ref_idx
+    }
+  }
+}
+
+impl Material for Dielactric {
+  fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+    let attenuation = Vec3::new(1.0, 1.0, 1.0);
+    let etai_over_etat = if rec.front_face {
+      1.0 / self.ref_idx
+    } else {
+      self.ref_idx
+    };
+
+    let unit_direction = Vec3::unit_vector(&r_in.direction);
+    let refracted = unit_direction.refract(&rec.normal, etai_over_etat);
+    let scattered = Ray::new(rec.p, refracted);
+    Some((attenuation, scattered))
+  }
+}
