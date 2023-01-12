@@ -1,3 +1,4 @@
+use rand::Rng;
 use rand::rngs::ThreadRng;
 
 use crate::ray::Ray;
@@ -50,7 +51,7 @@ impl Dielactric {
 }
 
 impl Material for Dielactric {
-  fn scatter<'a>(&self, _: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+  fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
     let attenuation = Vec3::new(1.0, 1.0, 1.0);
     let etai_over_etat = if rec.front_face {
       1.0 / self.ref_idx
@@ -67,11 +68,20 @@ impl Material for Dielactric {
       let scattered = Ray::new(rec.p, reflected);
       return Some((attenuation, scattered))
     }
-
-
-
+    let reflect_prob = schlick(cos_thena, etai_over_etat);
+    if rng.gen::<f64>() < reflect_prob {
+      let reflected = unit_direction.reflect(&rec.normal);
+      let scattered = Ray::new(rec.p, reflected);
+      return Some((attenuation, scattered));
+    }
     let refracted = unit_direction.refract(&rec.normal, etai_over_etat);
     let scattered = Ray::new(rec.p, refracted);
     Some((attenuation, scattered))
   }
+}
+
+fn schlick(cosine: f64, ref_idx: f64) -> f64 {
+  let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
+  r0 = r0*r0;
+  r0 + (1.0-r0)*(1.0-cosine).powf(5.0)
 }

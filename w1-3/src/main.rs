@@ -55,28 +55,35 @@ fn main() {
     & lambertian1
   );
   let lambertian2 = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
-  let sphere2 = Sphere::new (
+  let sphere2 = Sphere::new(
     Vec3::new(0.0, -100.5, -1.0),
     100.0,
-    & lambertian2
+    &lambertian2
   );
   let metal1 = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
-  let sphere3 = Sphere::new (
+  let sphere3 = Sphere::new(
     Vec3::new(1.0, 0.0, -1.0),
     0.5,
-    & metal1
+    &metal1
   );
   let dialectric1 = Dielactric::new(1.5);
-  let sphere4 = Sphere::new (
+  let sphere4 = Sphere::new(
     Vec3::new(-1.0, 0.0, -1.0),
     0.5,
-    & dialectric1
+    &dialectric1
+  );
+  let dialectric2 = Dielactric::new(1.5);
+  let sphere5 = Sphere::new(
+    Vec3::new(-1.0, 0.0, -1.0),
+    -0.45,
+    &dialectric2
   );
 
   world.add(&sphere1);
   world.add(&sphere2);
   world.add(&sphere3);
   world.add(&sphere4);
+  world.add(&sphere5);
 
   let cam = Camera::new();
 
