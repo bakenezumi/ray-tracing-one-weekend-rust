@@ -178,6 +178,17 @@ impl Vec3 {
     let r_out_perp = *n * -(1.0 - r_out_parallel.length_squared()).sqrt();
     r_out_parallel + r_out_perp
   }
+
+   pub fn random_in_unit_disk(rng: &mut ThreadRng) -> Vec3 {
+    let mut p: Vec3;
+    loop {
+      p = Vec3::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0);
+      if p.length_squared() >= 1.0 {
+        continue;
+      }
+      return p;
+    }
+  }
 }
 
 pub type Point3 = Vec3;

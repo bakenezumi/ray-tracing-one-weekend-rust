@@ -85,7 +85,15 @@ fn main() {
   world.add(&sphere4);
   world.add(&sphere5);
 
-  let cam = Camera::new(Vec3::new(-2.0, 2.0, 1.0), Vec3::new(0.0, 0.0, -1.0), Vec3::new(0.0, 1.0, 0.0), 20.0, (image_width as f64)/(image_height as f64));
+
+  let lookfrom = Vec3::new(3.0, 3.0, 2.0);
+  let lookat = Vec3::new(0.0, 0.0, -1.0);
+  let vup = Vec3::new(0.0, 1.0, 0.0);
+  let aspect_ratio = (image_width as f64)/(image_height as f64);
+  let dist_to_focus = (lookfrom-lookat).length();
+  let aperture = 2.0;
+
+  let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
 
   for j in (0 .. image_height).rev() {
     eprint!("\rScanlines remaining: {} ", j);
@@ -94,7 +102,7 @@ fn main() {
       for _ in 0 .. samples_per_pixel {
         let u = (i as f64 + rng.gen::<f64>()) / (image_width-1) as f64;
         let v = (j as f64 + rng.gen::<f64>()) / (image_height-1) as f64;
-        let r = cam.get_ray(u, v);
+        let r = cam.get_ray(&mut rng, u, v);
         pixel_color = pixel_color + ray_color(&mut rng, &r, &world, max_depth);
       }
       
