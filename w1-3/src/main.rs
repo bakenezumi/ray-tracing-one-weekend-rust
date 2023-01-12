@@ -85,7 +85,7 @@ fn main() {
   world.add(&sphere4);
   world.add(&sphere5);
 
-  let cam = Camera::new();
+  let cam = Camera::new(Vec3::new(-2.0, 2.0, 1.0), Vec3::new(0.0, 0.0, -1.0), Vec3::new(0.0, 1.0, 0.0), 20.0, (image_width as f64)/(image_height as f64));
 
   for j in (0 .. image_height).rev() {
     eprint!("\rScanlines remaining: {} ", j);
