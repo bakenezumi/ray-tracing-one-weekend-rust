@@ -8,14 +8,14 @@ use crate::vec3::Point3;
 use crate::vec3::Color;
 use crate::material::Material;
 
-pub struct Sphere<'a> {
+pub struct Sphere {
   pub center: Point3,
   pub radius: f64,
-  pub mat_ptr: &'a dyn Material
+  pub mat_ptr: Box<dyn Material>
 }
 
-impl Sphere<'_> {
-  pub fn new(cen: Point3, r: f64, m: &dyn Material) -> Sphere {
+impl Sphere {
+  pub fn new(cen: Point3, r: f64, m: Box<dyn Material>) -> Sphere {
     Sphere {
       center: cen,
       radius: r,
@@ -24,7 +24,7 @@ impl Sphere<'_> {
   }
 }
 
-impl Hittable for Sphere<'_> {
+impl Hittable for Sphere {
 
   fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
     let oc = r.origin - self.center;
@@ -39,7 +39,7 @@ impl Hittable for Sphere<'_> {
         let mut hit_rec = HitRecord {
           p: r.at(temp),
           normal: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-          mat_ptr: self.mat_ptr,
+          mat_ptr: &*self.mat_ptr,
           t: temp,
           front_face: false
         };
@@ -52,7 +52,7 @@ impl Hittable for Sphere<'_> {
         let mut hit_rec = HitRecord {
           p: r.at(temp2),
           normal: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
-          mat_ptr: self.mat_ptr,
+          mat_ptr: &*self.mat_ptr,
           t: temp2,
           front_face: false
         };

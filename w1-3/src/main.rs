@@ -34,6 +34,47 @@ fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> 
   Vec3 { x: 1.0, y: 1.0, z: 1.0 } * (1.0 - t) + Vec3 { x: 0.5, y: 0.7, z: 1.0 } * t
 }
 
+
+fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
+  let mut world = HittableList::new();
+  let ground_material = Lambertian::new(Vec3::new(0.5, 0.5, 0.5));
+  let ground = Sphere::new(
+    Vec3::new(0.0, -1000.0, 0.0),
+    1000.0,
+    Box::new(ground_material)
+  );
+  world.add(Box::new(ground));
+
+  for a in -11..11 {
+    for b in -11..11 {
+      let choose_mat = rng.gen::<f64>();
+      let center = Vec3::new((a as f64) + 0.9*rng.gen::<f64>(), 0.2, (b as f64) + 0.9*rng.gen::<f64>());
+
+      if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+        if choose_mat < 0.8 {
+          let albedo = Vec3::random(rng) * Vec3::random(rng);        
+          let r = Lambertian::new(albedo);
+          world.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
+        } else if choose_mat < 0.95 {
+          let albedo = Vec3::random(rng) * Vec3::random_range(rng, 0.5..1.0);
+          let fuzz = rng.gen_range(0.0..0.5);
+          let r = Metal::new(albedo, fuzz);
+          world.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
+        } else {
+          let r = Dielactric::new(1.5);
+          world.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
+        };        
+      }
+    }
+  }
+
+  world.add(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Box::new(Dielactric::new(1.5)))));
+  world.add(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Box::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
+  world.add(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
+
+  world
+}
+
 fn main() {
   let mut rng = Box::new(rand::thread_rng());
 
@@ -47,51 +88,14 @@ fn main() {
   println!("{} {}", image_width, image_height);
   println!("255");
 
-  let mut world = HittableList::new();
-  let lambertian1 = Lambertian::new(Vec3::new(0.1, 0.3, 0.5));
-  let sphere1 = Sphere::new (
-    Vec3::new(0.0, 0.0, -1.0),
-    0.5,
-    & lambertian1
-  );
-  let lambertian2 = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
-  let sphere2 = Sphere::new(
-    Vec3::new(0.0, -100.5, -1.0),
-    100.0,
-    &lambertian2
-  );
-  let metal1 = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
-  let sphere3 = Sphere::new(
-    Vec3::new(1.0, 0.0, -1.0),
-    0.5,
-    &metal1
-  );
-  let dialectric1 = Dielactric::new(1.5);
-  let sphere4 = Sphere::new(
-    Vec3::new(-1.0, 0.0, -1.0),
-    0.5,
-    &dialectric1
-  );
-  let dialectric2 = Dielactric::new(1.5);
-  let sphere5 = Sphere::new(
-    Vec3::new(-1.0, 0.0, -1.0),
-    -0.45,
-    &dialectric2
-  );
+  let world = random_scene(&mut rng);
 
-  world.add(&sphere1);
-  world.add(&sphere2);
-  world.add(&sphere3);
-  world.add(&sphere4);
-  world.add(&sphere5);
-
-
-  let lookfrom = Vec3::new(3.0, 3.0, 2.0);
-  let lookat = Vec3::new(0.0, 0.0, -1.0);
+  let lookfrom = Vec3::new(13.0, 2.0, 3.0);
+  let lookat = Vec3::new(0.0, 0.0, 0.0);
   let vup = Vec3::new(0.0, 1.0, 0.0);
   let aspect_ratio = (image_width as f64)/(image_height as f64);
-  let dist_to_focus = (lookfrom-lookat).length();
-  let aperture = 2.0;
+  let dist_to_focus = 10.0;
+  let aperture = 0.1;
 
   let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
 

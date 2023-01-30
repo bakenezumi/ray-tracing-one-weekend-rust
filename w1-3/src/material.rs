@@ -61,14 +61,14 @@ impl Material for Dielactric {
 
     let unit_direction = Vec3::unit_vector(&r_in.direction);
 
-    let cos_thena = std::cmp::min_by(-unit_direction.dot(&rec.normal), 1.0, |a, b| a.partial_cmp(b).unwrap());
-    let sin_thena = (1.0 - cos_thena*cos_thena).sqrt();
-    if etai_over_etat * sin_thena > 1.0 {
+    let cos_theta = std::cmp::min_by(-unit_direction.dot(&rec.normal), 1.0, |a, b| a.partial_cmp(b).unwrap());
+    let sin_theta = (1.0 - cos_theta*cos_theta).sqrt();
+    if etai_over_etat * sin_theta > 1.0 {
       let reflected = unit_direction.reflect(&rec.normal);
       let scattered = Ray::new(rec.p, reflected);
       return Some((attenuation, scattered))
     }
-    let reflect_prob = schlick(cos_thena, etai_over_etat);
+    let reflect_prob = schlick(cos_theta, etai_over_etat);
     if rng.gen::<f64>() < reflect_prob {
       let reflected = unit_direction.reflect(&rec.normal);
       let scattered = Ray::new(rec.p, reflected);

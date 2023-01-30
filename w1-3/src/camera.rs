@@ -26,7 +26,7 @@ impl Camera {
   ) -> Camera {
     let theta = vfov.to_radians();
     let h = (theta/2.0).tan();
-    let viewport_heght = 2.0 - h;
+    let viewport_heght = 2.0 * h;
     let viewport_width = aspect_ratio * viewport_heght;
 
     let w = (lookfrom - lookat).unit_vector();
