@@ -1,9 +1,11 @@
+use std::sync::mpsc;
+use std::sync::Mutex;
 use rand::Rng;
 use rand::rngs::ThreadRng;
-
+use rayon::prelude::*;
 use weekend::ray::Ray;
 use weekend::vec3::Vec3;
-use weekend::color::write_color;
+use weekend::vec3::Color;
 use weekend::hittable::Hittable;
 use weekend::hittable_list::HittableList;
 use weekend::sphere::Sphere;
@@ -75,8 +77,22 @@ fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
   world
 }
 
+pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
+  let scale = 1.0 / (samples_per_pixel as f64);
+
+  let r = (scale * pixel_color.x).sqrt();
+  let g = (scale * pixel_color.y).sqrt();
+  let b = (scale * pixel_color.z).sqrt();
+
+  format!(
+    "{} {} {}",
+    (256.0 * r.clamp(0.0, 0.999)) as i32,
+    (256.0 * g.clamp(0.0, 0.999)) as i32,
+    (256.0 * b.clamp(0.0, 0.999)) as i32
+  )
+}
+
 fn main() {
-  let mut rng = Box::new(rand::thread_rng());
 
   let aspect_ratio = 16.0 / 9.0;
   let image_width = 384;
@@ -88,7 +104,10 @@ fn main() {
   println!("{} {}", image_width, image_height);
   println!("255");
 
-  let world = random_scene(&mut rng);
+  let world = {
+    let mut rng = Box::new(rand::thread_rng());
+    random_scene(&mut rng)
+  };
 
   let lookfrom = Vec3::new(13.0, 2.0, 3.0);
   let lookat = Vec3::new(0.0, 0.0, 0.0);
@@ -99,7 +118,10 @@ fn main() {
 
   let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
 
-  for j in (0 .. image_height).rev() {
+  let (tx, rx) = mpsc::channel();
+  let mtx = Mutex::new(tx);
+  (0 .. image_height).into_par_iter().for_each(|j| {
+    let mut rng = Box::new(rand::thread_rng());
     eprint!("\rScanlines remaining: {} ", j);
     for i in 0 .. image_width {
       let mut pixel_color = Vec3 { x: 0.0, y: 0.0, z: 0.0 };
@@ -109,9 +131,22 @@ fn main() {
         let r = cam.get_ray(&mut rng, u, v);
         pixel_color = pixel_color + ray_color(&mut rng, &r, &world, max_depth);
       }
-      
-      write_color(&pixel_color, samples_per_pixel);    
+      let ppm = format_ppm(&pixel_color, samples_per_pixel);
+      mtx.lock().unwrap().send(((image_height-j, i), ppm)).unwrap();
+    }
+  });
+  
+  let mut list = Vec::new();
+  for v in rx.iter() {
+    list.push(v);
+    if image_height * image_width == list.len().try_into().unwrap() {
+      break;
     }
   }
+  list.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+  for (_, item) in list {
+    println!("{}", item);
+  }
+
   eprintln!("\nDone.");
 }

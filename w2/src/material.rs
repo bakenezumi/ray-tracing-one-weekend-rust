@@ -7,7 +7,7 @@ use crate::vec3::Vec3;
 use crate::vec3::Color;
 
 
-pub trait Material {
+pub trait Material: Sync {
   fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
 }
 
