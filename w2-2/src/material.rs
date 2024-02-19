@@ -28,7 +28,7 @@ impl Metal {
 impl Material for Metal {
   fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
     let reflected = r_in.direction.unit_vector().reflect(&rec.normal);
-    let scattered = Ray::new(rec.p, reflected+Vec3::random_in_unit_sphere(rng)*self.fuzz);
+    let scattered = Ray::new(rec.p, reflected+Vec3::random_in_unit_sphere(rng)*self.fuzz, 0.0);
     let attenuation = self.albedo;
     if scattered.direction.dot(&rec.normal) > 0.0 {
       Some((attenuation, scattered))
@@ -65,17 +65,17 @@ impl Material for Dielactric {
     let sin_theta = (1.0 - cos_theta*cos_theta).sqrt();
     if etai_over_etat * sin_theta > 1.0 {
       let reflected = unit_direction.reflect(&rec.normal);
-      let scattered = Ray::new(rec.p, reflected);
+      let scattered = Ray::new(rec.p, reflected, 0.0);
       return Some((attenuation, scattered))
     }
     let reflect_prob = schlick(cos_theta, etai_over_etat);
     if rng.gen::<f64>() < reflect_prob {
       let reflected = unit_direction.reflect(&rec.normal);
-      let scattered = Ray::new(rec.p, reflected);
+      let scattered = Ray::new(rec.p, reflected, 0.0);
       return Some((attenuation, scattered));
     }
     let refracted = unit_direction.refract(&rec.normal, etai_over_etat);
-    let scattered = Ray::new(rec.p, refracted);
+    let scattered = Ray::new(rec.p, refracted, 0.0);
     Some((attenuation, scattered))
   }
 }
