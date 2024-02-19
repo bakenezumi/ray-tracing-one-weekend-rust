@@ -117,8 +117,10 @@ async fn main() {
     let aspect_ratio = (image_width as f64)/(image_height as f64);
     let dist_to_focus = 10.0;
     let aperture = 0.1;
+    let time0 = 0.0;
+    let time1 = 0.0;
   
-    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
+    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, time0, time1);
   
 
     (0 .. image_height).into_par_iter().for_each(|j| {

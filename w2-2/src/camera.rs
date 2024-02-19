@@ -11,7 +11,9 @@ pub struct Camera {
   vertical: Vec3,
   u: Vec3,
   v: Vec3,
-  lens_radius: f64
+  lens_radius: f64,
+  time0: f64,
+  time1: f64
 }
 
 impl Camera {
@@ -22,7 +24,9 @@ impl Camera {
     vfov: f64,
     aspect_ratio: f64,
     aperture: f64,
-    focus_dist: f64
+    focus_dist: f64,
+    time0: f64,
+    time1: f64,
   ) -> Camera {
     let theta = vfov.to_radians();
     let h = (theta/2.0).tan();
@@ -46,7 +50,9 @@ impl Camera {
       lower_left_corner: {
         origin - horizontal/2.0 - vertical/2.0 - w*focus_dist
       },
-      lens_radius: aperture / 2.0
+      lens_radius: aperture / 2.0,
+      time0,
+      time1
     }
   }
 
