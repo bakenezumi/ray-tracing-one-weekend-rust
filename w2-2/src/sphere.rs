@@ -78,9 +78,9 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-  fn scatter<'a>(&self, rng: &'a mut ThreadRng, _: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+  fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
     let scatter_direction = rec.normal + Vec3::random_unit_vector(rng);
-    let scattered = Ray::new(rec.p, scatter_direction, 0.0);
+    let scattered = Ray::new(rec.p, scatter_direction, r_in.time);
     let attenuation = self.albedo;
     Some((attenuation, scattered))
   }
