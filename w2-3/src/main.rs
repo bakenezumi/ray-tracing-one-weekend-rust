@@ -9,7 +9,7 @@ use weekend::vec3::Vec3;
 use weekend::vec3::Color;
 use weekend::hittable::Hittable;
 use weekend::hittable_list::HittableList;
-use weekend::sphere::{MovingSphere, Sphere};
+use weekend::sphere::Sphere;
 use weekend::sphere::Lambertian;
 use weekend::camera::Camera;
 use weekend::material::Metal;
@@ -57,8 +57,7 @@ fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
         if choose_mat < 0.8 {
           let albedo = Vec3::random(rng) * Vec3::random(rng);        
           let r = Lambertian::new(albedo);
-          let center2 = center + Vec3::new(0.0, rng.gen_range(0.0..0.5), 0.0);
-          world.add(Box::new(MovingSphere::new(center, center2, 0.0, 1.0, 0.2, Box::new(r))));
+          world.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
         } else if choose_mat < 0.95 {
           let albedo = Vec3::random(rng) * Vec3::random_range(rng, 0.5..1.0);
           let fuzz = rng.gen_range(0.0..0.5);
@@ -119,7 +118,7 @@ async fn main() {
     let dist_to_focus = 10.0;
     let aperture = 0.1;
     let time0 = 0.0;
-    let time1 = 1.0;
+    let time1 = 0.0;
   
     let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, time0, time1);
   
