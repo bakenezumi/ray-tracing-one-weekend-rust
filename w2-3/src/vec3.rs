@@ -201,7 +201,7 @@ impl Vec3 {
     }
   }
 
-  pub fn dimension(&self, i: i32) -> f64 {
+  pub fn d(&self, i: i32) -> f64 {
     if i == 0 {
       self.x
     } else if i == 1 {

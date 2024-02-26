@@ -18,9 +18,9 @@ impl Aabb {
         let mut tmin= max;
         let mut tmax = min;
         for a in 0..=2 {
-            let inv_d = 1.0 / r.direction.dimension(a);
-            let mut t0 = (self.min.dimension(a) - r.origin.dimension(a)) * inv_d;
-            let mut t1 = (self.max.dimension(a) - r.origin.dimension(a)) * inv_d;
+            let inv_d = 1.0 / r.direction.d(a);
+            let mut t0 = (self.min.d(a) - r.origin.d(a)) * inv_d;
+            let mut t1 = (self.max.d(a) - r.origin.d(a)) * inv_d;
             if inv_d < 0.0 {
                 std::mem::swap(&mut t0, &mut t1);
             }
