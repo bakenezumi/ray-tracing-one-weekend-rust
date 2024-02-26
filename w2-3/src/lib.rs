@@ -6,3 +6,4 @@ pub mod hittable_list;
 pub mod camera;
 pub mod material;
 pub mod aabb;
+pub mod bvh_node;

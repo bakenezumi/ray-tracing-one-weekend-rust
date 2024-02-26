@@ -6,6 +6,14 @@ pub struct Aabb {
     max: Point3
 }
 
+impl Copy for Aabb {}
+
+impl Clone for Aabb {
+    fn clone(&self) -> Aabb {
+        *self
+    }
+}
+
 impl Aabb {
     pub fn new(min: Point3, max: Point3) -> Aabb {
         Aabb {
@@ -14,7 +22,7 @@ impl Aabb {
         }
     }
 
-    pub fn hit(&self, r: Ray, min: f64, max: f64) -> bool {
+    pub fn hit(&self, r: &Ray, min: f64, max: f64) -> bool {
         let mut tmin= max;
         let mut tmax = min;
         for a in 0..=2 {
