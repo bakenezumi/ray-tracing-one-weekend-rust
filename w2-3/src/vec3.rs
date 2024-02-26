@@ -200,6 +200,17 @@ impl Vec3 {
       return p;
     }
   }
+
+  pub fn dimension(&self, i: i32) -> f64 {
+    if i == 0 {
+      self.x
+    } else if i == 1 {
+      self.y
+    } else { // FIXME
+      self.z
+    }
+  }
+
 }
 
 pub type Point3 = Vec3;

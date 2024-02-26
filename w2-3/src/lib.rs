@@ -5,3 +5,4 @@ pub mod vec3;
 pub mod hittable_list;
 pub mod camera;
 pub mod material;
+pub mod aabb;
