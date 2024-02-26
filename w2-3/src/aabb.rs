@@ -18,12 +18,14 @@ impl Aabb {
         let mut tmin= max;
         let mut tmax = min;
         for a in 0..=2 {
-            let t0 = f64::min((self.min.dimension(a) - r.origin.dimension(a)) / r.direction.dimension(a),
-                      (self.max.dimension(a) - r.origin.dimension(a)) / r.direction.dimension(a));
-            let t1 = f64::max((self.min.dimension(a) - r.origin.dimension(a)) / r.direction.dimension(a),
-                      (self.max.dimension(a) - r.origin.dimension(a)) / r.direction.dimension(a));
-            tmin = f64::max(t0, tmin);
-            tmax = f64::min(t1, tmax);
+            let inv_d = 1.0 / r.direction.dimension(a);
+            let mut t0 = (self.min.dimension(a) - r.origin.dimension(a)) * inv_d;
+            let mut t1 = (self.max.dimension(a) - r.origin.dimension(a)) * inv_d;
+            if inv_d < 0.0 {
+                std::mem::swap(&mut t0, &mut t1);
+            }
+            tmin = if t0 > tmin { t0 } else { tmin };
+            tmax = if t1 < tmax { t1 } else { tmax };
             if tmax <= tmin {
                 return false
             }
