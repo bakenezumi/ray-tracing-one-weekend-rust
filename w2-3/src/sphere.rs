@@ -1,4 +1,5 @@
 use rand::rngs::ThreadRng;
+use crate::aabb::{Aabb, surrounding_box};
 
 use crate::hittable::Hittable;
 use crate::hittable::HitRecord;
@@ -62,6 +63,14 @@ impl Hittable for Sphere {
       }
     }
     None
+  }
+
+  fn bounding_box(&self, _: f64, _: f64) -> Option<Aabb> {
+    let output_box = Aabb::new(
+      self.center - Vec3::new(self.radius, self.radius, self.radius),
+      self.center + Vec3::new(self.radius, self.radius, self.radius)
+    );
+    Some(output_box)
   }
 }
 
@@ -149,4 +158,19 @@ impl Hittable for MovingSphere {
     }
     None
   }
+
+  fn bounding_box(&self, t0: f64, t1: f64) -> Option<Aabb> {
+    let box0 = Aabb::new(
+      self.center(t0) - Vec3::new(self.radius, self.radius, self.radius),
+      self.center(t0) + Vec3::new(self.radius, self.radius, self.radius)
+    );
+    let box1 = Aabb::new(
+      self.center(t1) - Vec3::new(self.radius, self.radius, self.radius),
+      self.center(t1) + Vec3::new(self.radius, self.radius, self.radius)
+    );
+
+    let output_box = surrounding_box(box0, box1);
+    Some(output_box)
+  }
+
 }

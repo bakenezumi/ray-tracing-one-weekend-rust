@@ -1,3 +1,4 @@
+use crate::aabb::Aabb;
 use crate::ray::Ray;
 use crate::hittable::Hittable;
 use crate::hittable::HitRecord;
@@ -35,5 +36,9 @@ impl Hittable for HittableList {
       }
     }
     temp_rec
+  }
+
+  fn bounding_box(&self, t0: f64, t1: f64) -> Option<Aabb> {
+    todo!()
   }
 }
