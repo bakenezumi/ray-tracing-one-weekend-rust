@@ -2,8 +2,8 @@ use crate::ray::Ray;
 use crate::vec3::Point3;
 
 pub struct Aabb {
-    min: Point3,
-    max: Point3
+    pub min: Point3,
+    pub max: Point3
 }
 
 impl Copy for Aabb {}

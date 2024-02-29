@@ -9,6 +9,7 @@ use crate::vec3::Point3;
 use crate::vec3::Color;
 use crate::material::Material;
 
+#[derive(Clone)]
 pub struct Sphere {
   pub center: Point3,
   pub radius: f64,
@@ -74,6 +75,7 @@ impl Hittable for Sphere {
   }
 }
 
+#[derive(Clone)]
 pub struct Lambertian {
   albedo: Color  
 }
@@ -95,6 +97,7 @@ impl Material for Lambertian {
   }
 }
 
+#[derive(Clone)]
 pub struct MovingSphere {
   pub center0: Point3,
   pub center1: Point3,

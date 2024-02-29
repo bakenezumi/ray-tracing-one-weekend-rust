@@ -23,7 +23,27 @@ impl HitRecord<'_> {
   }
 }
 
-pub trait Hittable: Sync {
+pub trait CloneHittable {
+  fn clone_box(&self) -> Box<dyn Hittable>;
+}
+pub trait Hittable: Sync + CloneHittable {
   fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
   fn bounding_box(&self, t0: f64, t1: f64) -> Option<Aabb>;
+
+}
+
+
+impl<T> CloneHittable for T
+  where
+      T: 'static + Hittable + Clone,
+{
+  fn clone_box(&self) -> Box<dyn Hittable> {
+    Box::new(self.clone())
+  }
+}
+
+impl Clone for Box<dyn Hittable> {
+  fn clone(&self) -> Box<dyn Hittable> {
+    self.clone_box()
+  }
 }

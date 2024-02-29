@@ -3,6 +3,7 @@ use crate::ray::Ray;
 use crate::hittable::Hittable;
 use crate::hittable::HitRecord;
 
+#[derive(Clone)]
 pub struct HittableList {
   objects: Vec<Box<dyn Hittable>>
 }

@@ -6,11 +6,15 @@ use crate::hittable::HitRecord;
 use crate::vec3::Vec3;
 use crate::vec3::Color;
 
+pub trait CloneMaterial {
+  fn clone_box(&self) -> Box<dyn Material>;
+}
 
-pub trait Material: Sync {
+pub trait Material: Sync + CloneMaterial {
   fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
 }
 
+#[derive(Clone)]
 pub struct Metal {
   albedo: Color,
   fuzz: f64
@@ -38,6 +42,7 @@ impl Material for Metal {
   }
 }
 
+#[derive(Clone)]
 pub struct Dielactric {
   ref_idx: f64
 }
@@ -84,4 +89,19 @@ fn schlick(cosine: f64, ref_idx: f64) -> f64 {
   let mut r0 = (1.0 - ref_idx) / (1.0 + ref_idx);
   r0 = r0*r0;
   r0 + (1.0-r0)*(1.0-cosine).powf(5.0)
+}
+
+impl<T> CloneMaterial for T
+  where
+      T: 'static + Material + Clone,
+{
+  fn clone_box(&self) -> Box<dyn Material> {
+    Box::new(self.clone())
+  }
+}
+
+impl Clone for Box<dyn Material> {
+  fn clone(&self) -> Box<dyn Material> {
+    self.clone_box()
+  }
 }
