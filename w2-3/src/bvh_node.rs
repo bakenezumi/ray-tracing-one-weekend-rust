@@ -80,8 +80,8 @@ impl BvhNode {
                     Box::new(BvhNode::new(rng, objects, mid, end, time0, time1)) as Box<dyn Hittable>
                 )
             };
-        let box_left = if let Some(x) = left.bounding_box(time0, time1) {x} else { panic!("No bounding box in bvh_node constructor.") };
-        let box_right = if let Some(x) = right.bounding_box(time0, time1) {x} else { panic!("No bounding box in bvh_node constructor.") };
+        let box_left = left.bounding_box(time0, time1).unwrap();
+        let box_right =right.bounding_box(time0, time1).unwrap();
         BvhNode {
             left: left,
             right: right,
@@ -89,15 +89,22 @@ impl BvhNode {
         }
     }
 }
+#[inline]
+fn box_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>, axis: i32) -> Ordering {
+    let box_a = a.bounding_box(0.0, 0.0).unwrap();
+    let box_b = b.bounding_box(0.0, 0.0).unwrap();
+
+    box_a.min.d(axis).partial_cmp(&box_b.min.d(axis)).unwrap()
+}
 
 fn box_x_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
-    todo!()
+    box_compare(a, b, 0)
 }
 
 fn box_y_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
-    todo!()
+    box_compare(a, b, 1)
 }
 
 fn box_z_compare(a: &Box<dyn Hittable>, b: &Box<dyn Hittable>) -> Ordering {
-    todo!()
+    box_compare(a, b, 2)
 }
