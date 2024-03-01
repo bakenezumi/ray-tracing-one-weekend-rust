@@ -4,6 +4,7 @@ use rand::Rng;
 use rand::rngs::ThreadRng;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::ParallelIterator;
+use weekend::bvh_node::BvhNode;
 use weekend::ray::Ray;
 use weekend::vec3::Vec3;
 use weekend::vec3::Color;
@@ -48,6 +49,8 @@ fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
   );
   world.add(Box::new(ground));
 
+  let mut objects = HittableList::new();
+
   for a in -11..11 {
     for b in -11..11 {
       let choose_mat = rng.gen::<f64>();
@@ -57,24 +60,27 @@ fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
         if choose_mat < 0.8 {
           let albedo = Vec3::random(rng) * Vec3::random(rng);        
           let r = Lambertian::new(albedo);
-          world.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
+          objects.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
         } else if choose_mat < 0.95 {
           let albedo = Vec3::random(rng) * Vec3::random_range(rng, 0.5..1.0);
           let fuzz = rng.gen_range(0.0..0.5);
           let r = Metal::new(albedo, fuzz);
-          world.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
+          objects.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
         } else {
           let r = Dielactric::new(1.5);
-          world.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
+          objects.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
         };        
       }
     }
   }
 
-  world.add(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Box::new(Dielactric::new(1.5)))));
-  world.add(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Box::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
-  world.add(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
+  objects.add(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Box::new(Dielactric::new(1.5)))));
+  objects.add(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Box::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
+  objects.add(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
 
+  // world.add(Box::new(objects));
+  let len = objects.objects.len();
+  world.add(Box::new(BvhNode::new(rng, objects, 0, len, 0.0, 0.0)));
   world
 }
 

@@ -5,7 +5,7 @@ use crate::hittable::HitRecord;
 
 #[derive(Clone)]
 pub struct HittableList {
-  objects: Vec<Box<dyn Hittable>>
+  pub objects: Vec<Box<dyn Hittable>>
 }
 
 impl HittableList {
@@ -43,7 +43,7 @@ impl Hittable for HittableList {
     if self.objects.is_empty() { return None };
     let mut output_box: Option<Aabb> = None;
 
-    for object in &self.objects {
+    for object in <Vec<Box<dyn Hittable>> as Clone>::clone(&self.objects).into_iter() {
       match object.bounding_box(t0, t1) {
         None => return None,
         Some(temp_box) => {

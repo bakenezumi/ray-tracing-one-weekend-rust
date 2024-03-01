@@ -22,9 +22,10 @@ impl Aabb {
         }
     }
 
+    #[inline]
     pub fn hit(&self, r: &Ray, min: f64, max: f64) -> bool {
-        let mut tmin= max;
-        let mut tmax = min;
+        let mut tmin= min;
+        let mut tmax = max;
         for a in 0..=2 {
             let inv_d = 1.0 / r.direction.d(a);
             let mut t0 = (self.min.d(a) - r.origin.d(a)) * inv_d;
