@@ -15,7 +15,7 @@ use weekend::material::Lambertian;
 use weekend::camera::Camera;
 use weekend::material::Metal;
 use weekend::material::Dielactric;
-use weekend::texture::SolidColor;
+use weekend::texture::{CheckerTexture, SolidColor};
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -42,7 +42,13 @@ fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> 
 
 fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
   let mut world = HittableList::new();
-  let ground_material = Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.5, 0.5, 0.5))));
+
+  let checker = Box::new(CheckerTexture::new(
+    Box::new(SolidColor::new(Vec3::new(0.2, 0.3, 0.1))),
+    Box::new(SolidColor::new(Vec3::new(0.9, 0.9, 0.9))),
+  ));
+
+  let ground_material = Lambertian::new(checker);
   let ground = Sphere::new(
     Vec3::new(0.0, -1000.0, 0.0),
     1000.0,

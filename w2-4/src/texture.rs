@@ -42,3 +42,29 @@ impl Texture for SolidColor {
         self.color_value
     }
 }
+
+#[derive(Clone)]
+pub struct CheckerTexture {
+    even: Box<dyn Texture>,
+    odd: Box<dyn Texture>
+}
+
+impl CheckerTexture {
+    pub fn new(even: Box<dyn Texture>, odd: Box<dyn Texture>) -> CheckerTexture {
+        CheckerTexture{
+            even: even,
+            odd: odd
+        }
+    }
+}
+
+impl Texture for CheckerTexture {
+    fn value(&self, u: f64, v: f64, p: &Point3) -> Color {
+        let sines = (10.0*p.x).sin()*(10.0*p.y).sin()*(10.0*p.z).sin();
+        if sines < 0.0 {
+            self.odd.value(u, v, p)
+        } else {
+            self.even.value(u, v, p)
+        }
+    }
+}
