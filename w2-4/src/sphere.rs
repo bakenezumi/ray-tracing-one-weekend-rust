@@ -1,4 +1,4 @@
-use rand::rngs::ThreadRng;
+use std::f64::consts::PI;
 use crate::aabb::{Aabb, surrounding_box};
 
 use crate::hittable::Hittable;
@@ -6,7 +6,6 @@ use crate::hittable::HitRecord;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 use crate::vec3::Point3;
-use crate::vec3::Color;
 use crate::material::Material;
 
 #[derive(Clone)]
@@ -38,11 +37,15 @@ impl Hittable for Sphere {
       let root = discriminant.sqrt();
       let temp = (-half_b - root)/a;
       if temp < t_max && temp > t_min {
+        let p = r.at(temp);
+        let (u, v) = get_sphere_uv(&p);
         let mut hit_rec = HitRecord {
-          p: r.at(temp),
+          p: p,
           normal: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
           mat_ptr: &*self.mat_ptr,
           t: temp,
+          u: u,
+          v: v,
           front_face: false
         };
         let outward_normal = (hit_rec.p - self.center) / self.radius;
@@ -51,11 +54,15 @@ impl Hittable for Sphere {
       }
       let temp2 = (-half_b + root) / a;
       if temp2 < t_max && temp2 > t_min {
+        let p = r.at(temp2);
+        let (u, v) = get_sphere_uv(&p);
         let mut hit_rec = HitRecord {
-          p: r.at(temp2),
+          p: p,
           normal: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
           mat_ptr: &*self.mat_ptr,
           t: temp2,
+          u: u,
+          v: v,
           front_face: false
         };
         let outward_normal = (hit_rec.p - self.center) / self.radius;
@@ -72,28 +79,6 @@ impl Hittable for Sphere {
       self.center + Vec3::new(self.radius, self.radius, self.radius)
     );
     Some(output_box)
-  }
-}
-
-#[derive(Clone)]
-pub struct Lambertian {
-  albedo: Color  
-}
-
-impl Lambertian {
-  pub fn new(albedo: Color) -> Lambertian {
-    Lambertian {
-      albedo
-    }
-  }
-}
-
-impl Material for Lambertian {
-  fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
-    let scatter_direction = rec.normal + Vec3::random_unit_vector(rng);
-    let scattered = Ray::new(rec.p, scatter_direction, r_in.time);
-    let attenuation = self.albedo;
-    Some((attenuation, scattered))
   }
 }
 
@@ -134,11 +119,15 @@ impl Hittable for MovingSphere {
       let root = discriminant.sqrt();
       let temp = (-half_b - root)/a;
       if temp < t_max && temp > t_min {
+        let p = r.at(temp);
+        let (u, v) = get_sphere_uv(&p);
         let mut hit_rec = HitRecord {
-          p: r.at(temp),
+          p: p,
           normal: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
           mat_ptr: &*self.mat_ptr,
           t: temp,
+          u: u,
+          v: v,
           front_face: false
         };
         let outward_normal = (hit_rec.p - self.center(r.time)) / self.radius;
@@ -147,11 +136,15 @@ impl Hittable for MovingSphere {
       }
       let temp2 = (-half_b + root) / a;
       if temp2 < t_max && temp2 > t_min {
+        let p = r.at(temp2);
+        let (u, v) = get_sphere_uv(&p);
         let mut hit_rec = HitRecord {
           p: r.at(temp2),
           normal: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
           mat_ptr: &*self.mat_ptr,
           t: temp2,
+          u: u,
+          v: v,
           front_face: false
         };
         let outward_normal = (hit_rec.p - self.center(r.time)) / self.radius;
@@ -176,4 +169,12 @@ impl Hittable for MovingSphere {
     Some(output_box)
   }
 
+}
+
+fn get_sphere_uv(p: &Vec3) -> (f64, f64) { // -> (u, v)
+  let phi = p.z.atan2(p.x);
+  let theta = p.y.asin();
+  let u = 1.0-(phi + PI) / (2.0*PI);
+  let v = (theta + PI/2.0) / PI;
+  (u, v)
 }

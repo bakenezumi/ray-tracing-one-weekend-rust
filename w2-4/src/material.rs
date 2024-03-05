@@ -3,6 +3,7 @@ use rand::rngs::ThreadRng;
 
 use crate::ray::Ray;
 use crate::hittable::HitRecord;
+use crate::texture::Texture;
 use crate::vec3::Vec3;
 use crate::vec3::Color;
 
@@ -12,6 +13,28 @@ pub trait CloneMaterial {
 
 pub trait Material: Sync + CloneMaterial {
   fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
+}
+
+#[derive(Clone)]
+pub struct Lambertian {
+  albedo: Box<dyn Texture>
+}
+
+impl Lambertian {
+  pub fn new(albedo: Box<dyn Texture>) -> Lambertian {
+    Lambertian {
+      albedo
+    }
+  }
+}
+
+impl Material for Lambertian {
+  fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+    let scatter_direction = rec.normal + Vec3::random_unit_vector(rng);
+    let scattered = Ray::new(rec.p, scatter_direction, r_in.time);
+    let attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
+    Some((attenuation, scattered))
+  }
 }
 
 #[derive(Clone)]

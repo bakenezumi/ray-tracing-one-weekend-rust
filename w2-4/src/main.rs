@@ -11,10 +11,11 @@ use weekend::vec3::Color;
 use weekend::hittable::Hittable;
 use weekend::hittable_list::HittableList;
 use weekend::sphere::Sphere;
-use weekend::sphere::Lambertian;
+use weekend::material::Lambertian;
 use weekend::camera::Camera;
 use weekend::material::Metal;
 use weekend::material::Dielactric;
+use weekend::texture::SolidColor;
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -41,7 +42,7 @@ fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> 
 
 fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
   let mut world = HittableList::new();
-  let ground_material = Lambertian::new(Vec3::new(0.5, 0.5, 0.5));
+  let ground_material = Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.5, 0.5, 0.5))));
   let ground = Sphere::new(
     Vec3::new(0.0, -1000.0, 0.0),
     1000.0,
@@ -59,7 +60,7 @@ fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
       if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
         if choose_mat < 0.8 {
           let albedo = Vec3::random(rng) * Vec3::random(rng);        
-          let r = Lambertian::new(albedo);
+          let r = Lambertian::new(Box::new(SolidColor::new(albedo)));
           objects.add(Box::new(Sphere::new(center, 0.2, Box::new(r))));
         } else if choose_mat < 0.95 {
           let albedo = Vec3::random(rng) * Vec3::random_range(rng, 0.5..1.0);
@@ -75,7 +76,7 @@ fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
   }
 
   objects.add(Box::new(Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, Box::new(Dielactric::new(1.5)))));
-  objects.add(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Box::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))))));
+  objects.add(Box::new(Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.4, 0.2, 0.1))))))));
   objects.add(Box::new(Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)))));
 
   // world.add(Box::new(objects));
