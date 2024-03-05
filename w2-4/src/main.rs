@@ -91,6 +91,25 @@ fn random_scene<'a>(rng: &mut ThreadRng) -> HittableList {
   world
 }
 
+fn two_spheres() -> HittableList {
+  let mut objects = HittableList::new();
+
+  let checker = Box::new(CheckerTexture::new(
+    Box::new(SolidColor::new(Vec3::new(0.2, 0.3, 0.1))),
+    Box::new(SolidColor::new(Vec3::new(0.9, 0.9, 0.9))),
+  ));
+
+  objects.add(
+    Box::new(Sphere::new(Vec3::new(0.0, -10.0, 0.0), 10.0, Box::new(Lambertian::new(checker.clone()))))
+  );
+
+  objects.add(
+    Box::new(Sphere::new(Vec3::new(0.0, 10.0, 0.0), 10.0, Box::new(Lambertian::new(checker))))
+  );
+
+  objects
+}
+
 pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
   let scale = 1.0 / (samples_per_pixel as f64);
 
@@ -120,8 +139,9 @@ async fn main() {
 
   let image_generation_task = async move {
     let world = {
-      let mut rng = Box::new(rand::thread_rng());
-      random_scene(&mut rng)
+      // let mut rng = Box::new(rand::thread_rng());
+      // random_scene(&mut rng)
+      two_spheres()
     };
   
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);
@@ -129,7 +149,8 @@ async fn main() {
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let aspect_ratio = (image_width as f64)/(image_height as f64);
     let dist_to_focus = 10.0;
-    let aperture = 0.1;
+    // let aperture = 0.1;
+    let aperture = 0.0;
     let time0 = 0.0;
     let time1 = 0.0;
   
