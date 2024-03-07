@@ -1,3 +1,5 @@
+use rand::prelude::ThreadRng;
+use crate::perlin::Perlin;
 use crate::vec3::{Color, Point3};
 
 
@@ -66,5 +68,23 @@ impl Texture for CheckerTexture {
         } else {
             self.even.value(u, v, p)
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct NoiseTexture {
+    noise: Perlin
+}
+impl NoiseTexture {
+    pub fn new(rng: &mut ThreadRng) -> NoiseTexture {
+        NoiseTexture {
+            noise: Perlin::new(rng)
+        }
+    }
+}
+
+impl Texture for NoiseTexture {
+    fn value(&self, _: f64, _: f64, p: &Point3) -> Color {
+        Color::new(1.0, 1.0, 1.0) * self.noise.noise(*p)
     }
 }
