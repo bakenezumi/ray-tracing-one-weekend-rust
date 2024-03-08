@@ -73,18 +73,20 @@ impl Texture for CheckerTexture {
 
 #[derive(Clone)]
 pub struct NoiseTexture {
-    noise: Perlin
+    noise: Perlin,
+    scale: f64
 }
 impl NoiseTexture {
-    pub fn new(rng: &mut ThreadRng) -> NoiseTexture {
+    pub fn new(rng: &mut ThreadRng, scale: f64) -> NoiseTexture {
         NoiseTexture {
-            noise: Perlin::new(rng)
+            noise: Perlin::new(rng),
+            scale
         }
     }
 }
 
 impl Texture for NoiseTexture {
     fn value(&self, _: f64, _: f64, p: &Point3) -> Color {
-        Color::new(1.0, 1.0, 1.0) * self.noise.noise(*p)
+        Color::new(1.0, 1.0, 1.0) * self.noise.noise(self.scale * *p)
     }
 }

@@ -113,7 +113,7 @@ fn two_spheres() -> HittableList {
 fn two_perlin_spheres(rng: &mut ThreadRng) -> HittableList {
   let mut objects = HittableList::new();
 
-  let pertext = Box::new(NoiseTexture::new(rng));
+  let pertext = Box::new(NoiseTexture::new(rng, 5.0));
 
   objects.add(
     Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Box::new(Lambertian::new(pertext.clone()))))
