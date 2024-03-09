@@ -15,7 +15,7 @@ use weekend::material::Lambertian;
 use weekend::camera::Camera;
 use weekend::material::Metal;
 use weekend::material::Dielactric;
-use weekend::texture::{CheckerTexture, NoiseTexture, SolidColor};
+use weekend::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -126,6 +126,19 @@ fn two_perlin_spheres(rng: &mut ThreadRng) -> HittableList {
   objects
 }
 
+fn earth() -> HittableList {
+  let mut objects = HittableList::new();
+
+  let earth_texture = Box::new(ImageTexture::new("assets/earthmap.jpg"));
+  let earth_surface = Box::new(Lambertian::new(earth_texture));
+
+  objects.add(
+    Box::new(Sphere::new(Vec3::new(0.0, 0.0, 0.0), 2.0, earth_surface))
+  );
+
+  objects
+}
+
 pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
   let scale = 1.0 / (samples_per_pixel as f64);
 
@@ -160,8 +173,10 @@ async fn main() {
 
       // two_spheres()
 
-      let mut rng = Box::new(rand::thread_rng());
-      two_perlin_spheres(&mut rng)
+      // let mut rng = Box::new(rand::thread_rng());
+      // two_perlin_spheres(&mut rng)
+
+        earth()
     };
   
     let lookfrom = Vec3::new(13.0, 2.0, 3.0);

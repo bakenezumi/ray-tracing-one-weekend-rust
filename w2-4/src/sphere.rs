@@ -38,7 +38,7 @@ impl Hittable for Sphere {
       let temp = (-half_b - root)/a;
       if temp < t_max && temp > t_min {
         let p = r.at(temp);
-        let (u, v) = get_sphere_uv(&p);
+        let (u, v) = get_sphere_uv(&((p - self.center) / self.radius) );
         let mut hit_rec = HitRecord {
           p: p,
           normal: Vec3 { x: 0.0, y: 0.0, z: 0.0 },
