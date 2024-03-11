@@ -17,19 +17,23 @@ use weekend::material::Metal;
 use weekend::material::Dielactric;
 use weekend::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
 
-fn ray_color(rng: &mut ThreadRng, r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
+fn ray_color(rng: &mut ThreadRng, r: &Ray, background: &Color, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
-    return Vec3 {x: 0.0, y: 0.0, z: 0.0 };
+    return Color::black();
   }
+
   match world.hit(r, 0.001, f64::INFINITY) {
-    None => {}
+    None => {
+      return *background;
+    },
     Some(rec) => {
+      let emitted = rec.mat_ptr.emitted(rec.u, rec.v, &rec.p);
       match rec.mat_ptr.scatter(rng, r, &rec) {
         None => {
-          return Vec3::new(0.0, 0.0, 0.0)
+          return emitted;
         }
         Some((attenuation, scattered)) => {
-          return attenuation * ray_color(rng, &scattered, world, depth-1);
+          return emitted + attenuation * ray_color(rng, &scattered, background, world, depth-1);
         }
       }
     }
@@ -200,7 +204,8 @@ async fn main() {
           let u = (i as f64 + rng.gen::<f64>()) / (image_width-1) as f64;
           let v = (j as f64 + rng.gen::<f64>()) / (image_height-1) as f64;
           let r = cam.get_ray(&mut rng, u, v);
-          pixel_color = pixel_color + ray_color(&mut rng, &r, &world, max_depth);
+          let background = Color::black();
+          pixel_color = pixel_color + ray_color(&mut rng, &r, &background, &world, max_depth);
         }
         let ppm = format_ppm(&pixel_color, samples_per_pixel);
         mtx.lock().unwrap().send(((image_height-j, i), ppm)).unwrap();

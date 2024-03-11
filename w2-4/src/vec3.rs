@@ -219,3 +219,9 @@ impl Vec3 {
 
 pub type Point3 = Vec3;
 pub type Color = Vec3;
+
+impl Color {
+  pub fn black() -> Color {
+    Point3 { x: 0.0, y: 0.0, z: 0.0 }
+  }
+}

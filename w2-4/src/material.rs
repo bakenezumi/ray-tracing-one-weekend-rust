@@ -13,6 +13,22 @@ pub trait CloneMaterial {
 
 pub trait Material: Sync + CloneMaterial {
   fn scatter<'a>(&self, rng: &'a mut ThreadRng, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
+  fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Color;
+}
+
+impl<T> CloneMaterial for T
+  where
+      T: 'static + Material + Clone,
+{
+  fn clone_box(&self) -> Box<dyn Material> {
+    Box::new(self.clone())
+  }
+}
+
+impl Clone for Box<dyn Material> {
+  fn clone(&self) -> Box<dyn Material> {
+    self.clone_box()
+  }
 }
 
 #[derive(Clone)]
@@ -34,6 +50,10 @@ impl Material for Lambertian {
     let scattered = Ray::new(rec.p, scatter_direction, r_in.time);
     let attenuation = self.albedo.value(rec.u, rec.v, &rec.p);
     Some((attenuation, scattered))
+  }
+
+  fn emitted(&self, _: f64, _: f64, _: &Vec3) -> Color {
+    Color::black()
   }
 }
 
@@ -62,6 +82,10 @@ impl Material for Metal {
     } else {
       None
     }
+  }
+
+  fn emitted(&self, _: f64, _: f64, _: &Vec3) -> Color {
+    Color::black()
   }
 }
 
@@ -106,6 +130,10 @@ impl Material for Dielactric {
     let scattered = Ray::new(rec.p, refracted, 0.0);
     Some((attenuation, scattered))
   }
+
+  fn emitted(&self, _: f64, _: f64, _: &Vec3) -> Color {
+    Color::black()
+  }
 }
 
 fn schlick(cosine: f64, ref_idx: f64) -> f64 {
@@ -114,17 +142,27 @@ fn schlick(cosine: f64, ref_idx: f64) -> f64 {
   r0 + (1.0-r0)*(1.0-cosine).powf(5.0)
 }
 
-impl<T> CloneMaterial for T
-  where
-      T: 'static + Material + Clone,
-{
-  fn clone_box(&self) -> Box<dyn Material> {
-    Box::new(self.clone())
-  }
+#[derive(Clone)]
+struct DiffuseLight {
+  emit: Box<dyn Texture>
 }
 
-impl Clone for Box<dyn Material> {
-  fn clone(&self) -> Box<dyn Material> {
-    self.clone_box()
+impl DiffuseLight {
+  pub fn new(emit: Box<dyn Texture>) -> DiffuseLight {
+    DiffuseLight {
+      emit
+    }
+  }
+
+
+}
+
+impl Material for DiffuseLight {
+  fn scatter<'a>(&self, _: &'a mut ThreadRng, _: &Ray, _: &HitRecord) -> Option<(Color, Ray)> {
+    None
+  }
+
+  fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Color {
+    self.emit.value(u, v, p)
   }
 }
