@@ -11,11 +11,12 @@ use weekend::vec3::Color;
 use weekend::hittable::Hittable;
 use weekend::hittable_list::HittableList;
 use weekend::sphere::Sphere;
-use weekend::material::Lambertian;
+use weekend::material::{DiffuseLight, Lambertian};
 use weekend::camera::Camera;
 use weekend::material::Metal;
 use weekend::material::Dielactric;
 use weekend::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
+use weekend::xy_rect::XyRect;
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, background: &Color, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -38,9 +39,6 @@ fn ray_color(rng: &mut ThreadRng, r: &Ray, background: &Color, world: &dyn Hitta
       }
     }
   }
-  let unit_direction = r.direction.unit_vector();
-  let t = 0.5 * (unit_direction.y + 1.0);
-  Vec3 { x: 1.0, y: 1.0, z: 1.0 } * (1.0 - t) + Vec3 { x: 0.5, y: 0.7, z: 1.0 } * t
 }
 
 
@@ -143,6 +141,28 @@ fn earth() -> HittableList {
   objects
 }
 
+fn simple_light() -> HittableList {
+  let mut objects = HittableList::new();
+
+  let pertext = Box::new(NoiseTexture::new(&mut rand::thread_rng(), 4.0));
+  objects.add(
+    Box::new(Sphere::new(Vec3::new(0.0, -1000.0, 0.0), 1000.0, Box::new(Lambertian::new(pertext.clone()))))
+  );
+  objects.add(
+    Box::new(Sphere::new(Vec3::new(0.0, 2.0, 0.0), 2.0, Box::new(Lambertian::new(pertext.clone())))
+  ));
+
+  let difflight = Box::new(DiffuseLight::new(Box::new(SolidColor::new(Vec3::new(4.0, 4.0, 4.0)))));
+  objects.add(
+    Box::new(Sphere::new(Vec3::new(0.0, 7.0, 0.0), 2.0, difflight.clone()))
+  );
+  objects.add(
+    Box::new(XyRect::new(3.0, 5.0, 1.0, 3.0, -2.0, difflight))
+  );
+
+  objects
+}
+
 pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
   let scale = 1.0 / (samples_per_pixel as f64);
 
@@ -162,7 +182,7 @@ pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
 async fn main() {
 
   let aspect_ratio = 16.0 / 9.0;
-  let image_width = 384;
+  let image_width = 400;
   let image_height = ((image_width as f64) / aspect_ratio) as i32;
   let samples_per_pixel = 100;
   let max_depth = 50;
@@ -180,20 +200,23 @@ async fn main() {
       // let mut rng = Box::new(rand::thread_rng());
       // two_perlin_spheres(&mut rng)
 
-        earth()
+      // earth()
+
+      simple_light()
     };
   
-    let lookfrom = Vec3::new(13.0, 2.0, 3.0);
-    let lookat = Vec3::new(0.0, 0.0, 0.0);
+    let lookfrom = Vec3::new(26.0, 3.0, 6.0);
+    let lookat = Vec3::new(0.0, 2.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
+    let vfov = 20.0;
     let aspect_ratio = (image_width as f64)/(image_height as f64);
     let dist_to_focus = 10.0;
     // let aperture = 0.1;
     let aperture = 0.0;
     let time0 = 0.0;
-    let time1 = 0.0;
+    let time1 = 1.0;
   
-    let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, time0, time1);
+    let cam = Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, time0, time1);
   
 
     (0 .. image_height).into_par_iter().for_each(|j| {
@@ -204,7 +227,7 @@ async fn main() {
           let u = (i as f64 + rng.gen::<f64>()) / (image_width-1) as f64;
           let v = (j as f64 + rng.gen::<f64>()) / (image_height-1) as f64;
           let r = cam.get_ray(&mut rng, u, v);
-          let background = Color::black();
+          let background = Color::new(0.0, 0.0, 0.0);
           pixel_color = pixel_color + ray_color(&mut rng, &r, &background, &world, max_depth);
         }
         let ppm = format_ppm(&pixel_color, samples_per_pixel);

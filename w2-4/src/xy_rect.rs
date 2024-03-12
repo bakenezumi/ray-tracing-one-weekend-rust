@@ -5,7 +5,7 @@ use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 #[derive(Clone)]
-struct XyRect {
+pub struct XyRect {
     x0: f64,
     x1: f64,
     y0: f64,

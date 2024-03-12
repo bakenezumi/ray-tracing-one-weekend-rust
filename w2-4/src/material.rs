@@ -143,7 +143,7 @@ fn schlick(cosine: f64, ref_idx: f64) -> f64 {
 }
 
 #[derive(Clone)]
-struct DiffuseLight {
+pub struct DiffuseLight {
   emit: Box<dyn Texture>
 }
 
