@@ -9,4 +9,4 @@ pub mod aabb;
 pub mod bvh_node;
 pub mod texture;
 pub mod perlin;
-pub mod xy_rect;
+pub mod rect;

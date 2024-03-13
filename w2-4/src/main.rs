@@ -16,7 +16,7 @@ use weekend::camera::Camera;
 use weekend::material::Metal;
 use weekend::material::Dielactric;
 use weekend::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
-use weekend::xy_rect::XyRect;
+use weekend::rect::XyRect;
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, background: &Color, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
