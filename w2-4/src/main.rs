@@ -16,7 +16,7 @@ use weekend::camera::Camera;
 use weekend::material::Metal;
 use weekend::material::Dielactric;
 use weekend::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
-use weekend::rect::XyRect;
+use weekend::rect::{XyRect, XzRect, YzRect};
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, background: &Color, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -163,6 +163,35 @@ fn simple_light() -> HittableList {
   objects
 }
 
+fn cornell_box(rng: &mut ThreadRng) -> HittableList {
+    let mut objects = HittableList::new();
+
+    let red = Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.65, 0.05, 0.05)))));
+    let white = Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.73, 0.73, 0.73)))));
+    let green = Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.12, 0.45, 0.15)))));
+    let light = Box::new(DiffuseLight::new(Box::new(SolidColor::new(Vec3::new(15.0, 15.0, 15.0)))));
+
+    objects.add(
+        Box::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green.clone()))
+    );
+    objects.add(
+        Box::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red.clone()))
+    );
+    objects.add(
+        Box::new(XzRect::new(213.0, 343.0, 227.0, 332.0, 554.0, light.clone()))
+    );
+    objects.add(
+        Box::new(XzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, white.clone()))
+    );
+    objects.add(
+        Box::new(XzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone()))
+    );
+    objects.add(
+        Box::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone()))
+    );
+    objects
+}
+
 pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
   let scale = 1.0 / (samples_per_pixel as f64);
 
@@ -181,8 +210,11 @@ pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
 #[tokio::main]
 async fn main() {
 
-  let aspect_ratio = 16.0 / 9.0;
-  let image_width = 400;
+  // let aspect_ratio = 16.0 / 9.0;
+  // let image_width = 400;
+  let aspect_ratio = 1.0;
+  let image_width = 500;
+
   let image_height = ((image_width as f64) / aspect_ratio) as i32;
   let samples_per_pixel = 100;
   let max_depth = 50;
@@ -202,20 +234,34 @@ async fn main() {
 
       // earth()
 
-      simple_light()
+      // simple_light()
+
+      let mut rng = Box::new(rand::thread_rng());
+      cornell_box(&mut rng)
     };
   
-    let lookfrom = Vec3::new(26.0, 3.0, 6.0);
-    let lookat = Vec3::new(0.0, 2.0, 0.0);
+    // let lookfrom = Vec3::new(26.0, 3.0, 6.0);
+    // let lookat = Vec3::new(0.0, 2.0, 0.0);
+    // let vup = Vec3::new(0.0, 1.0, 0.0);
+    // let vfov = 20.0;
+    // let aspect_ratio = (image_width as f64)/(image_height as f64);
+    // let dist_to_focus = 10.0;
+    // // let aperture = 0.1;
+    // let aperture = 0.0;
+    // let time0 = 0.0;
+    // let time1 = 1.0;
+
+    let lookfrom = Vec3::new(278.0, 278.0, -800.0);
+    let lookat = Vec3::new(278.0, 278.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
-    let vfov = 20.0;
+    let vfov = 40.0;
     let aspect_ratio = (image_width as f64)/(image_height as f64);
     let dist_to_focus = 10.0;
     // let aperture = 0.1;
     let aperture = 0.0;
     let time0 = 0.0;
     let time1 = 1.0;
-  
+
     let cam = Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, time0, time1);
   
 
@@ -227,6 +273,7 @@ async fn main() {
           let u = (i as f64 + rng.gen::<f64>()) / (image_width-1) as f64;
           let v = (j as f64 + rng.gen::<f64>()) / (image_height-1) as f64;
           let r = cam.get_ray(&mut rng, u, v);
+          // let background = Color::new(0.0, 0.0, 0.0);
           let background = Color::new(0.0, 0.0, 0.0);
           pixel_color = pixel_color + ray_color(&mut rng, &r, &background, &world, max_depth);
         }
