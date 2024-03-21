@@ -8,7 +8,7 @@ use weekend::bvh_node::BvhNode;
 use weekend::ray::Ray;
 use weekend::vec3::Vec3;
 use weekend::vec3::Color;
-use weekend::hittable::Hittable;
+use weekend::hittable::{CloneHittable, Hittable};
 use weekend::hittable_list::HittableList;
 use weekend::sphere::Sphere;
 use weekend::material::{DiffuseLight, Lambertian};
@@ -18,6 +18,8 @@ use weekend::material::Dielactric;
 use weekend::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
 use weekend::rect::{XyRect, XzRect, YzRect};
 use weekend::box_model::BoxModel;
+use weekend::rotate::RotateY;
+use weekend::translate::Translate;
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, background: &Color, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -191,8 +193,15 @@ fn cornell_box() -> HittableList {
         Box::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone()))
     );
 
-    objects.add(Box::new(BoxModel::new(Vec3::new(130.0, 0.0, 65.0), Vec3::new(295.0, 165.0, 230.0), white.clone())));
-    objects.add(Box::new(BoxModel::new(Vec3::new(265.0, 0.0, 295.0), Vec3::new(430.0, 330.0, 4600.0), white.clone())));
+    let box1 = Box::new(BoxModel::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(165.0, 330.0, 165.0), white.clone()));
+    let box1 = Box::new(RotateY::new(box1, 15.0));
+    let box1 = Box::new(Translate::new(box1, Vec3::new(265.0, 0.0, 295.0)));
+    objects.add(box1);
+
+    let box2 = Box::new(BoxModel::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(165.0, 165.0, 165.0), white.clone()));
+    let box2 = Box::new(RotateY::new(box2, -18.0));
+    let box2 = Box::new(Translate::new(box2, Vec3::new(130.0, 0.0, 65.0)));
+    objects.add(box2);
 
     objects
 }

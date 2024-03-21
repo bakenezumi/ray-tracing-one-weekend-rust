@@ -4,7 +4,7 @@ use crate::ray::Ray;
 use crate::vec3::Vec3;
 
 #[derive(Clone)]
-struct Translate {
+pub struct Translate {
     ptr: Box<dyn Hittable>,
     offset: Vec3,
 }
