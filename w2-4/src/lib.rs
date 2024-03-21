@@ -10,3 +10,4 @@ pub mod bvh_node;
 pub mod texture;
 pub mod perlin;
 pub mod rect;
+pub mod box_model;

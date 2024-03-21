@@ -17,6 +17,7 @@ use weekend::material::Metal;
 use weekend::material::Dielactric;
 use weekend::texture::{CheckerTexture, ImageTexture, NoiseTexture, SolidColor};
 use weekend::rect::{XyRect, XzRect, YzRect};
+use weekend::box_model::BoxModel;
 
 fn ray_color(rng: &mut ThreadRng, r: &Ray, background: &Color, world: &dyn Hittable, depth: i32) -> Vec3 {
   if depth <= 0 {
@@ -163,7 +164,7 @@ fn simple_light() -> HittableList {
   objects
 }
 
-fn cornell_box(rng: &mut ThreadRng) -> HittableList {
+fn cornell_box() -> HittableList {
     let mut objects = HittableList::new();
 
     let red = Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.65, 0.05, 0.05)))));
@@ -189,6 +190,10 @@ fn cornell_box(rng: &mut ThreadRng) -> HittableList {
     objects.add(
         Box::new(XyRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white.clone()))
     );
+
+    objects.add(Box::new(BoxModel::new(Vec3::new(130.0, 0.0, 65.0), Vec3::new(295.0, 165.0, 230.0), white.clone())));
+    objects.add(Box::new(BoxModel::new(Vec3::new(265.0, 0.0, 295.0), Vec3::new(430.0, 330.0, 4600.0), white.clone())));
+
     objects
 }
 
@@ -236,8 +241,7 @@ async fn main() {
 
       // simple_light()
 
-      let mut rng = Box::new(rand::thread_rng());
-      cornell_box(&mut rng)
+      cornell_box()
     };
   
     // let lookfrom = Vec3::new(26.0, 3.0, 6.0);
