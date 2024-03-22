@@ -168,7 +168,7 @@ impl Material for DiffuseLight {
 }
 
 #[derive(Clone)]
-struct IsoTropic {
+pub struct IsoTropic {
   albedo: Box<dyn Texture>
 }
 

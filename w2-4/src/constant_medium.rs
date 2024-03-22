@@ -6,7 +6,7 @@ use crate::vec3::Vec3;
 
 
 #[derive(Clone)]
-struct ConstantMedium {
+pub struct ConstantMedium {
     boundary: Box<dyn Hittable>,
     phase_function: Box<dyn Material>,
     neg_inv_density: f64,
