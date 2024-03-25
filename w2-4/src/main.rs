@@ -10,7 +10,7 @@ use weekend::vec3::Vec3;
 use weekend::vec3::Color;
 use weekend::hittable::{CloneHittable, Hittable};
 use weekend::hittable_list::HittableList;
-use weekend::sphere::Sphere;
+use weekend::sphere::{MovingSphere, Sphere};
 use weekend::material::{DiffuseLight, IsoTropic, Lambertian};
 use weekend::camera::Camera;
 use weekend::material::Metal;
@@ -247,6 +247,74 @@ fn cornell_smoke() -> HittableList {
     objects
 }
 
+fn final_scene(rng: &mut ThreadRng) -> HittableList {
+    let mut boxes1 = HittableList::new();
+    let ground = Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.48, 0.83, 0.53)))));
+    const BOXES_PER_SIDE: usize = 20;
+
+    for i in 0 .. BOXES_PER_SIDE {
+        for j in 0 .. BOXES_PER_SIDE {
+            let w = 100.0;
+            boxes1.add(
+                Box::new(BoxModel::new(
+                    Vec3::new(
+                        -1000.0 + i as f64 * w,
+                        0.0,
+                        -1000.0 + j as f64 * w) ,
+                    Vec3::new(
+                        -1000.0 + i as f64 * w + w,
+                        rng.gen_range(1.0..101.0),
+                        -1000.0 + j as f64 * w + w),
+                    ground.clone()
+                ))
+            );
+        }
+    }
+
+    let mut objects = HittableList::new();
+    objects.add(Box::new(BvhNode::new(rng, boxes1, 0, BOXES_PER_SIDE*BOXES_PER_SIDE , 0.0, 1.0)));
+
+    let light = Box::new(DiffuseLight::new(Box::new(SolidColor::new(Vec3::new(7.0, 7.0, 7.0)))));
+    objects.add(Box::new(XzRect::new(123.0, 423.0, 147.0, 412.0, 554.0, light.clone())));
+
+    let center1 = Vec3::new(400.0, 400.0, 200.0);
+    let center2 = center1 + Vec3::new(30.0, 0.0, 0.0);
+    let moving_sphere_material = Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.7, 0.3, 0.1)))));
+    objects.add(Box::new(MovingSphere::new(center1, center2, 0.0, 1.0, 50.0, moving_sphere_material)));
+
+    objects.add(Box::new(Sphere::new(Vec3::new(260.0, 150.0, 45.0), 50.0, Box::new(Dielactric::new(1.5)))));
+    objects.add(Box::new(Sphere::new(Vec3::new(0.0, 150.0, 145.0), 50.0, Box::new(Metal::new(Vec3::new(0.8, 0.8, 0.9), 10.0)))));
+
+    let boundary = Box::new(Sphere::new(Vec3::new(360.0, 150.0, 145.0), 70.0, Box::new(Dielactric::new(1.5))));
+    objects.add(boundary);
+    let boundary = Box::new(Sphere::new(Vec3::new(360.0, 150.0, 145.0), 70.0, Box::new(Dielactric::new(1.5))));
+    objects.add(Box::new(ConstantMedium::new(boundary, 0.2, Box::new(IsoTropic::new(Box::new(SolidColor::new(Vec3::new(0.2, 0.4, 0.9))))))));
+    let boundary = Box::new(Sphere::new(Vec3::new(0.0, 0.0, 0.0), 5000.0, Box::new(Dielactric::new(1.5))));
+    objects.add(Box::new(ConstantMedium::new(boundary, 0.0001, Box::new(IsoTropic::new(Box::new(SolidColor::new(Vec3::new(1.0, 1.0, 1.0))))))));
+
+    let emat = Box::new(Lambertian::new(Box::new(ImageTexture::new("assets/earthmap.jpg"))));
+    objects.add(Box::new(Sphere::new(Vec3::new(400.0, 200.0, 400.0), 100.0, emat)));
+    let pertext = Box::new(NoiseTexture::new(rng, 0.1));
+    objects.add(Box::new(Sphere::new(Vec3::new(220.0, 280.0, 300.0), 80.0, Box::new(Lambertian::new(pertext)))));
+
+    let mut boxes2 = HittableList::new();
+    let white = Box::new(Lambertian::new(Box::new(SolidColor::new(Vec3::new(0.73, 0.73, 0.73)))));
+    let ns = 1000;
+    for _ in 0 .. ns {
+        boxes2.add(Box::new(Sphere::new(Vec3::random_range(rng, 0.0..165.0), 10.0, white.clone())));
+    }
+
+    objects.add(Box::new(Translate::new(
+        Box::new(RotateY::new(
+            Box::new(BvhNode::new(rng, boxes2, 0, ns, 0.0, 1.0)),
+            15.0
+        )),
+        Vec3::new(-100.0, 270.0, 395.0)
+    )));
+
+    objects
+}
+
 pub fn format_ppm(pixel_color: &Color, samples_per_pixel: i32) -> String {
   let scale = 1.0 / (samples_per_pixel as f64);
 
@@ -271,7 +339,8 @@ async fn main() {
   let image_width = 600;
 
   let image_height = ((image_width as f64) / aspect_ratio) as i32;
-  let samples_per_pixel = 200;
+  // let samples_per_pixel = 200;
+    let samples_per_pixel = 50;
   let max_depth = 50;
 
   let (tx, rx) = mpsc::channel();
@@ -293,7 +362,10 @@ async fn main() {
 
       // cornell_box()
 
-        cornell_smoke()
+        // cornell_smoke()
+
+        let mut rng = Box::new(rand::thread_rng());
+        final_scene(&mut rng)
     };
   
     // let lookfrom = Vec3::new(26.0, 3.0, 6.0);
@@ -307,16 +379,28 @@ async fn main() {
     // let time0 = 0.0;
     // let time1 = 1.0;
 
-    let lookfrom = Vec3::new(278.0, 278.0, -800.0);
-    let lookat = Vec3::new(278.0, 278.0, 0.0);
-    let vup = Vec3::new(0.0, 1.0, 0.0);
-    let vfov = 40.0;
-    let aspect_ratio = (image_width as f64)/(image_height as f64);
-    let dist_to_focus = 10.0;
-    // let aperture = 0.1;
-    let aperture = 0.0;
-    let time0 = 0.0;
-    let time1 = 1.0;
+    // let lookfrom = Vec3::new(278.0, 278.0, -800.0);
+    // let lookat = Vec3::new(278.0, 278.0, 0.0);
+    // let vup = Vec3::new(0.0, 1.0, 0.0);
+    // let vfov = 40.0;
+    // let aspect_ratio = (image_width as f64)/(image_height as f64);
+    // let dist_to_focus = 10.0;
+    // // let aperture = 0.1;
+    // let aperture = 0.0;
+    // let time0 = 0.0;
+    // let time1 = 1.0;
+
+      let lookfrom = Vec3::new(478.0, 278.0, -600.0);
+      let lookat = Vec3::new(278.0, 278.0, 0.0);
+      let vup = Vec3::new(0.0, 1.0, 0.0);
+      let vfov = 40.0;
+      let aspect_ratio = (image_width as f64)/(image_height as f64);
+      let dist_to_focus = 10.0;
+      // let aperture = 0.1;
+      let aperture = 0.0;
+      let time0 = 0.0;
+      let time1 = 1.0;
+
 
     let cam = Camera::new(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus, time0, time1);
   
@@ -329,7 +413,6 @@ async fn main() {
           let u = (i as f64 + rng.gen::<f64>()) / (image_width-1) as f64;
           let v = (j as f64 + rng.gen::<f64>()) / (image_height-1) as f64;
           let r = cam.get_ray(&mut rng, u, v);
-          // let background = Color::new(0.0, 0.0, 0.0);
           let background = Color::new(0.0, 0.0, 0.0);
           pixel_color = pixel_color + ray_color(&mut rng, &r, &background, &world, max_depth);
         }
